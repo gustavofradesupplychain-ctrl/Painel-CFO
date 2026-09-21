@@ -267,10 +267,27 @@
       variada: null
     };
 
-    function salvarEstado() {
-      localStorage.setItem('cfo_5cat_dashboard', JSON.stringify(estado));
-      renderizar();
+    async function salvarEstado() {
+    localStorage.setItem('cfo_scat_dashboard', JSON.stringify(estado));
+
+    const userId = localStorage.getItem('cfo_user_id') || crypto.randomUUID();
+    localStorage.setItem('cfo_user_id', userId);
+
+    const { error } = await supabaseClient
+        .from('cfo_estado')
+        .upsert({
+            user_id: userId,
+            estado: estado,
+            updated_at: new Date().toISOString()
+        });
+
+    if (error) {
+        console.error('Erro ao salvar no Supabase:', error);
+        alert('Não foi possível salvar no banco. Os dados foram mantidos neste navegador.');
     }
+
+    renderizar();
+}
 
     function resetarDados() {
       if (confirm('Deseja restaurar as configurações originais?')) {
