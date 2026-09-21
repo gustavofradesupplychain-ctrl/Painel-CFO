@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel CFO - Gestão de Passivos e Reestruturação</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://fwvwimgffzbctayhlrvt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_cClNqwsrBBvYbLIcRHMi0Q_vhyUXnCU';
+
+  const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+</script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
   <div class="max-w-7xl mx-auto space-y-6">
