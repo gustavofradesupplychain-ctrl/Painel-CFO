@@ -267,26 +267,63 @@
       variada: null
     };
 
-    async function salvarEstado() {
+async function salvarEstado() {
+  try {
     localStorage.setItem('cfo_scat_dashboard', JSON.stringify(estado));
 
-    const userId = localStorage.getItem('cfo_user_id') || crypto.randomUUID();
-    localStorage.setItem('cfo_user_id', userId);
+    let userId = localStorage.getItem('cfo_user_id');
 
-    const { error } = await supabaseClient
-        .from('cfo_estado')
-        .upsert({
-            user_id: userId,
-            estado: estado,
-            updated_at: new Date().toISOString()
-        });
-
-    if (error) {
-        console.error('Erro ao salvar no Supabase:', error);
-        alert('Não foi possível salvar no banco. Os dados foram mantidos neste navegador.');
+    if (!userId) {
+      userId = crypto.randomUUID();
+      localStorage.setItem('cfo_user_id', userId);
     }
 
+    const { data, error } = await supabaseClient
+      .from('cfo_estado')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Erro ao consultar estado:', error);
+      return;
+    }
+
+    let resultado;
+
+    if (data) {
+      resultado = await supabaseClient
+        .from('cfo_estado')
+        .update({
+          estado: estado,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+    } else {
+      resultado = await supabaseClient
+        .from('cfo_estado')
+        .insert({
+          user_id: userId,
+          estado: estado,
+          updated_at: new Date().toISOString()
+        });
+    }
+
+    if (resultado.error) {
+      console.error('Erro ao salvar no Supabase:', resultado.error);
+      alert(
+        'Erro ao salvar no banco. Abra o Console (F12) para ver o detalhe.'
+      );
+      return;
+    }
+
+    console.log('Estado salvo com sucesso no Supabase.');
     renderizar();
+
+  } catch (erro) {
+    console.error('Erro inesperado ao salvar:', erro);
+    alert('Erro inesperado ao salvar os dados.');
+  }
 }
 
     function resetarDados() {
