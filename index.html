@@ -3,251 +3,669 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel CFO - Gestão de Passivos e Reestruturação</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://fwvwimgffzbctayhlrvt.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_cClNqwsrBBvYbLIcRHMi0Q_vhyUXnCU';
 
-  const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-</script>
+  <title>Painel CFO - Gestão de Passivos e Reestruturação</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = 'https://fwvwimgffzbctayhlrvt.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_cClNqwsrBBvYbLIcRHMi0Q_vhyUXnCU';
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+  </script>
 </head>
+
 <body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
+
   <div class="max-w-7xl mx-auto space-y-6">
-    
-    <!-- HEADER GLOBAL -->
+
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
     <div class="flex flex-col lg:flex-row lg:items-center justify-between bg-slate-900 text-white p-6 rounded-xl shadow-md gap-4">
+
       <div>
-        <h1 class="text-2xl font-bold tracking-tight">PAINEL CFO & REESTRUTURAÇÃO FINANCEIRA</h1>
-        <p class="text-slate-400 text-sm mt-1">Gestão Completa por Categorias com Edição de Valores e Totais Devidos</p>
+        <h1 class="text-2xl font-bold tracking-tight">
+          PAINEL CFO & REESTRUTURAÇÃO FINANCEIRA
+        </h1>
+
+        <p class="text-slate-400 text-sm mt-1">
+          Gestão Completa por Categorias com Edição de Valores e Totais Devidos
+        </p>
       </div>
-      
+
       <div class="flex flex-wrap gap-2">
-        <button onclick="document.getElementById('inputImportar').click()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+        <button
+          onclick="document.getElementById('inputImportar').click()"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           📥 Importar (JSON)
         </button>
-        <input type="file" id="inputImportar" accept=".json" class="hidden" onchange="importarDados(event)">
 
-        <button onclick="exportarCSV()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+        <input
+          type="file"
+          id="inputImportar"
+          accept=".json"
+          class="hidden"
+          onchange="importarDados(event)"
+        >
+
+        <button
+          onclick="exportarCSV()"
+          class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           📊 Exportar Excel (CSV)
         </button>
 
-        <button onclick="exportarJSON()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+        <button
+          onclick="exportarJSON()"
+          class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           💾 Backup (JSON)
         </button>
 
-        <button onclick="resetarDados()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded border border-slate-700 transition">
+        <button
+          onclick="resetarDados()"
+          class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded border border-slate-700 transition"
+        >
           Restaurar Padrão
         </button>
+
       </div>
     </div>
 
-    <!-- CARDS DE RESUMO POR CATEGORIA -->
+
+    <!-- ========================================================= -->
+    <!-- CARDS -->
+    <!-- ========================================================= -->
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-bold uppercase text-slate-500">1. Contas Bancárias</span>
-        <div id="cardBancos" class="text-lg font-bold mt-1 text-slate-800">R$ 0,00</div>
-        <span class="text-[10px] text-slate-400">Saldo com Abatimento</span>
-      </div>
 
       <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-bold uppercase text-slate-500">2. Dívida Ativa</span>
-        <div id="cardDividas" class="text-lg font-bold mt-1 text-rose-600">R$ 0,00</div>
-        <span class="text-[10px] text-slate-400">Financiamentos/Empréstimos</span>
+        <span class="text-xs font-bold uppercase text-slate-500">
+          1. Contas Bancárias
+        </span>
+
+        <div
+          id="cardBancos"
+          class="text-lg font-bold mt-1 text-slate-800"
+        >
+          R$ 0,00
+        </div>
+
+        <span class="text-[10px] text-slate-400">
+          Saldo com Abatimento
+        </span>
       </div>
+
 
       <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-bold uppercase text-slate-500">3. Cartões de Crédito</span>
-        <div id="cardCartoes" class="text-lg font-bold mt-1 text-amber-600">R$ 0,00</div>
-        <span class="text-[10px] text-slate-400">Faturas Acumuladas</span>
+
+        <span class="text-xs font-bold uppercase text-slate-500">
+          2. Dívida Ativa
+        </span>
+
+        <div
+          id="cardDividas"
+          class="text-lg font-bold mt-1 text-rose-600"
+        >
+          R$ 0,00
+        </div>
+
+        <span class="text-[10px] text-slate-400">
+          Financiamentos/Empréstimos
+        </span>
+
       </div>
+
 
       <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-bold uppercase text-slate-500">4. Despesas Fixas</span>
-        <div id="cardFixas" class="text-lg font-bold mt-1 text-slate-700">R$ 0,00</div>
-        <span class="text-[10px] text-slate-400">Custo Fixo Mensal</span>
+
+        <span class="text-xs font-bold uppercase text-slate-500">
+          3. Cartões de Crédito
+        </span>
+
+        <div
+          id="cardCartoes"
+          class="text-lg font-bold mt-1 text-amber-600"
+        >
+          R$ 0,00
+        </div>
+
+        <span class="text-[10px] text-slate-400">
+          Faturas Acumuladas
+        </span>
+
       </div>
 
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm bg-slate-900 text-white">
-        <span class="text-xs font-bold uppercase text-slate-400">Total Devido Geral</span>
-        <div id="cardTotalGeral" class="text-lg font-bold mt-1 text-rose-400">R$ 0,00</div>
-        <span class="text-[10px] text-slate-400">Passivo Acumulado</span>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+
+        <span class="text-xs font-bold uppercase text-slate-500">
+          4. Despesas Fixas
+        </span>
+
+        <div
+          id="cardFixas"
+          class="text-lg font-bold mt-1 text-slate-700"
+        >
+          R$ 0,00
+        </div>
+
+        <span class="text-[10px] text-slate-400">
+          Custo Fixo Mensal
+        </span>
+
       </div>
+
+
+      <div class="bg-slate-900 text-white p-4 rounded-xl border border-slate-200 shadow-sm">
+
+        <span class="text-xs font-bold uppercase text-slate-400">
+          Total Devido Geral
+        </span>
+
+        <div
+          id="cardTotalGeral"
+          class="text-lg font-bold mt-1 text-rose-400"
+        >
+          R$ 0,00
+        </div>
+
+        <span class="text-[10px] text-slate-400">
+          Passivo Acumulado
+        </span>
+
+      </div>
+
     </div>
 
-    <!-- 1. CONTAS BANCÁRIAS E ENTRADAS DE RECURSO -->
+
+    <!-- ========================================================= -->
+    <!-- 1. BANCOS -->
+    <!-- ========================================================= -->
+
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+
         <div>
+
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span>🏦</span> 1. Saldos Bancários (Negativos & Entradas)
+            <span>🏦</span>
+            1. Saldos Bancários (Negativos & Entradas)
           </h2>
-          <p class="text-xs text-slate-500">Lançamentos de Entradas reduzem automaticamente o saldo acumulado negativo.</p>
+
+          <p class="text-xs text-slate-500">
+            Lançamentos de Entradas reduzem automaticamente o saldo acumulado negativo.
+          </p>
+
         </div>
+
         <div class="flex gap-2">
-          <button onclick="adicionarEntrada()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+          <button
+            onclick="adicionarEntrada()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+          >
             + Injetar Entrada / Aporte
           </button>
-          <button onclick="adicionarBanco()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+          <button
+            onclick="adicionarBanco()"
+            class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+          >
             + Nova Conta
           </button>
+
         </div>
+
       </div>
+
 
       <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex justify-between items-center text-xs">
+
         <div>
-          <span class="font-bold text-emerald-900">Entradas / Aportes Registrados para Abatimento:</span>
-          <span id="txtTotalEntradas" class="font-bold text-emerald-700 ml-2">R$ 0,00</span>
+
+          <span class="font-bold text-emerald-900">
+            Entradas / Aportes Registrados para Abatimento:
+          </span>
+
+          <span
+            id="txtTotalEntradas"
+            class="font-bold text-emerald-700 ml-2"
+          >
+            R$ 0,00
+          </span>
+
         </div>
-        <button onclick="limparEntradas()" class="text-emerald-800 hover:underline text-[11px]">Zerar Entradas</button>
+
+        <button
+          onclick="limparEntradas()"
+          class="text-emerald-800 hover:underline text-[11px]"
+        >
+          Zerar Entradas
+        </button>
+
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="gridBancos"></div>
+
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        id="gridBancos"
+      ></div>
+
+
       <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-        <span>Total Acumulado em Contas (Com Abatimento):</span>
-        <span id="totalCatBancos" class="text-slate-900">R$ 0,00</span>
+
+        <span>
+          Total Acumulado em Contas (Com Abatimento):
+        </span>
+
+        <span
+          id="totalCatBancos"
+          class="text-slate-900"
+        >
+          R$ 0,00
+        </span>
+
       </div>
+
     </div>
 
-    <!-- 2. DÍVIDA ATIVA -->
+
+    <!-- ========================================================= -->
+    <!-- 2. DIVIDA -->
+    <!-- ========================================================= -->
+
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+
       <div class="flex justify-between items-center mb-4">
+
         <div>
+
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span>🏛️</span> 2. Dívida Ativa (Financiamentos e Empréstimos)
+            <span>🏛️</span>
+            2. Dívida Ativa (Financiamentos e Empréstimos)
           </h2>
-          <p class="text-xs text-slate-500">Financiamentos de longo prazo, créditos com garantia e empréstimos</p>
+
+          <p class="text-xs text-slate-500">
+            Financiamentos de longo prazo, créditos com garantia e empréstimos
+          </p>
+
         </div>
-        <button onclick="adicionarDivida()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+        <button
+          onclick="adicionarDivida()"
+          class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           + Nova Dívida Ativa
         </button>
+
       </div>
+
+
       <div class="overflow-x-auto">
+
         <table class="w-full text-sm text-left border-collapse">
+
           <thead>
+
             <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
-              <th class="p-3">Credor / Instituição</th>
-              <th class="p-3">Tipo / Descrição</th>
-              <th class="p-3">Parcela Mensal</th>
-              <th class="p-3">Saldo Devedor Total</th>
-              <th class="p-3 text-center">Ações</th>
+
+              <th class="p-3">
+                Credor / Instituição
+              </th>
+
+              <th class="p-3">
+                Tipo / Descrição
+              </th>
+
+              <th class="p-3">
+                Parcela Mensal
+              </th>
+
+              <th class="p-3">
+                Saldo Devedor Total
+              </th>
+
+              <th class="p-3 text-center">
+                Ações
+              </th>
+
             </tr>
+
           </thead>
-          <tbody id="tabelaDividas" class="divide-y divide-slate-100"></tbody>
+
+          <tbody
+            id="tabelaDividas"
+            class="divide-y divide-slate-100"
+          ></tbody>
+
         </table>
+
       </div>
+
+
       <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-        <span>Total Devido (Dívida Ativa):</span>
-        <span id="totalCatDividas" class="text-rose-600">R$ 0,00</span>
+
+        <span>
+          Total Devido (Dívida Ativa):
+        </span>
+
+        <span
+          id="totalCatDividas"
+          class="text-rose-600"
+        >
+          R$ 0,00
+        </span>
+
       </div>
+
     </div>
 
-    <!-- 3. CARTÕES DE CRÉDITO -->
+
+    <!-- ========================================================= -->
+    <!-- 3. CARTOES -->
+    <!-- ========================================================= -->
+
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+
       <div class="flex justify-between items-center mb-4">
+
         <div>
+
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span>💳</span> 3. Cartões de Crédito
+            <span>💳</span>
+            3. Cartões de Crédito
           </h2>
-          <p class="text-xs text-slate-500">Faturas atuais, rotativo e acordos em cartões</p>
+
+          <p class="text-xs text-slate-500">
+            Faturas atuais, rotativo e acordos em cartões
+          </p>
+
         </div>
-        <button onclick="adicionarCartao()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+        <button
+          onclick="adicionarCartao()"
+          class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           + Novo Cartão
         </button>
+
       </div>
+
+
       <div class="overflow-x-auto">
+
         <table class="w-full text-sm text-left border-collapse">
+
           <thead>
+
             <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
-              <th class="p-3">Cartão / Banco</th>
-              <th class="p-3">Titular</th>
-              <th class="p-3">Vencimento</th>
-              <th class="p-3">Valor da Fatura / Débito</th>
-              <th class="p-3 text-center">Ações</th>
+
+              <th class="p-3">
+                Cartão / Banco
+              </th>
+
+              <th class="p-3">
+                Titular
+              </th>
+
+              <th class="p-3">
+                Vencimento
+              </th>
+
+              <th class="p-3">
+                Valor da Fatura / Débito
+              </th>
+
+              <th class="p-3 text-center">
+                Ações
+              </th>
+
             </tr>
+
           </thead>
-          <tbody id="tabelaCartoes" class="divide-y divide-slate-100"></tbody>
+
+          <tbody
+            id="tabelaCartoes"
+            class="divide-y divide-slate-100"
+          ></tbody>
+
         </table>
+
       </div>
+
+
       <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-        <span>Total Devido (Cartões de Crédito):</span>
-        <span id="totalCatCartoes" class="text-amber-600">R$ 0,00</span>
+
+        <span>
+          Total Devido (Cartões de Crédito):
+        </span>
+
+        <span
+          id="totalCatCartoes"
+          class="text-amber-600"
+        >
+          R$ 0,00
+        </span>
+
       </div>
+
     </div>
 
-    <!-- 4. DESPESAS FIXAS -->
+
+    <!-- ========================================================= -->
+    <!-- 4. FIXAS -->
+    <!-- ========================================================= -->
+
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+
       <div class="flex justify-between items-center mb-4">
+
         <div>
+
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span>📌</span> 4. Despesas Fixas
+            <span>📌</span>
+            4. Despesas Fixas
           </h2>
-          <p class="text-xs text-slate-500">Condomínio, aluguel, sistemas e compromissos recorrentes</p>
+
+          <p class="text-xs text-slate-500">
+            Condomínio, aluguel, sistemas e compromissos recorrentes
+          </p>
+
         </div>
-        <button onclick="adicionarFixa()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+        <button
+          onclick="adicionarFixa()"
+          class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           + Nova Despesa Fixa
         </button>
+
       </div>
+
+
       <div class="overflow-x-auto">
+
         <table class="w-full text-sm text-left border-collapse">
+
           <thead>
+
             <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
-              <th class="p-3">Descrição</th>
-              <th class="p-3">Dia Vencimento</th>
-              <th class="p-3">Valor (R$)</th>
-              <th class="p-3">Status</th>
-              <th class="p-3 text-center">Ações</th>
+
+              <th class="p-3">
+                Descrição
+              </th>
+
+              <th class="p-3">
+                Dia Vencimento
+              </th>
+
+              <th class="p-3">
+                Valor (R$)
+              </th>
+
+              <th class="p-3">
+                Status
+              </th>
+
+              <th class="p-3 text-center">
+                Ações
+              </th>
+
             </tr>
+
           </thead>
-          <tbody id="tabelaFixas" class="divide-y divide-slate-100"></tbody>
+
+          <tbody
+            id="tabelaFixas"
+            class="divide-y divide-slate-100"
+          ></tbody>
+
         </table>
+
       </div>
+
+
       <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-        <span>Total Devido (Despesas Fixas):</span>
-        <span id="totalCatFixas" class="text-slate-900">R$ 0,00</span>
+
+        <span>
+          Total Devido (Despesas Fixas):
+        </span>
+
+        <span
+          id="totalCatFixas"
+          class="text-slate-900"
+        >
+          R$ 0,00
+        </span>
+
       </div>
+
     </div>
 
-    <!-- 5. DESPESAS VARIADAS -->
+
+    <!-- ========================================================= -->
+    <!-- 5. VARIADAS -->
+    <!-- ========================================================= -->
+
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+
       <div class="flex justify-between items-center mb-4">
+
         <div>
+
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span>🛒</span> 5. Despesas Variadas
+            <span>🛒</span>
+            5. Despesas Variadas
           </h2>
-          <p class="text-xs text-slate-500">Gastos pontuais, imprevistos e custos sazonais</p>
+
+          <p class="text-xs text-slate-500">
+            Gastos pontuais, imprevistos e custos sazonais
+          </p>
+
         </div>
-        <button onclick="adicionarVariada()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+
+        <button
+          onclick="adicionarVariada()"
+          class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg transition"
+        >
           + Nova Despesa Variada
         </button>
+
       </div>
+
+
       <div class="overflow-x-auto">
+
         <table class="w-full text-sm text-left border-collapse">
+
           <thead>
+
             <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
-              <th class="p-3">Descrição</th>
-              <th class="p-3">Data</th>
-              <th class="p-3">Valor (R$)</th>
-              <th class="p-3">Status</th>
-              <th class="p-3 text-center">Ações</th>
+
+              <th class="p-3">
+                Descrição
+              </th>
+
+              <th class="p-3">
+                Data
+              </th>
+
+              <th class="p-3">
+                Valor (R$)
+              </th>
+
+              <th class="p-3">
+                Status
+              </th>
+
+              <th class="p-3 text-center">
+                Ações
+              </th>
+
             </tr>
+
           </thead>
-          <tbody id="tabelaVariadas" class="divide-y divide-slate-100"></tbody>
+
+          <tbody
+            id="tabelaVariadas"
+            class="divide-y divide-slate-100"
+          ></tbody>
+
         </table>
+
       </div>
+
+
       <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-        <span>Total Devido (Despesas Variadas):</span>
-        <span id="totalCatVariadas" class="text-slate-900">R$ 0,00</span>
+
+        <span>
+          Total Devido (Despesas Variadas):
+        </span>
+
+        <span
+          id="totalCatVariadas"
+          class="text-slate-900"
+        >
+          R$ 0,00
+        </span>
+
       </div>
+
     </div>
 
   </div>
 
+
+  <!-- =========================================================== -->
+  <!-- JAVASCRIPT -->
+  <!-- =========================================================== -->
+
   <script>
+
+    /* ===========================================================
+       CONFIGURAÇÃO
+    =========================================================== */
+
+    const STORAGE_KEY = 'cfo_5cat_dashboard';
+    const USER_KEY = 'cfo_user_id';
+
+
+    /* ===========================================================
+       DADOS INICIAIS
+    =========================================================== */
+
     const DADOS_INICIAIS = {
       entradasAcumuladas: 0,
       bancos: [],
@@ -257,9 +675,16 @@
       variadas: []
     };
 
-    let estado = JSON.parse(localStorage.getItem('cfo_5cat_dashboard')) || DADOS_INICIAIS;
 
-    // ESTADOS DE EDIÇÃO INLINE POR CATEGORIA
+    /* ===========================================================
+       ESTADO
+    =========================================================== */
+
+    let estado =
+      JSON.parse(localStorage.getItem(STORAGE_KEY))
+      || JSON.parse(JSON.stringify(DADOS_INICIAIS));
+
+
     let editandoId = {
       divida: null,
       cartao: null,
@@ -267,457 +692,2282 @@
       variada: null
     };
 
-async function salvarEstado() {
-  try {
-    localStorage.setItem('cfo_scat_dashboard', JSON.stringify(estado));
 
-    let userId = localStorage.getItem('cfo_user_id');
+    /* ===========================================================
+       UTILITÁRIOS
+    =========================================================== */
 
-    if (!userId) {
-      userId = crypto.randomUUID();
-      localStorage.setItem('cfo_user_id', userId);
+    function garantirEstruturaEstado() {
+
+      if (!estado || typeof estado !== 'object') {
+        estado = JSON.parse(JSON.stringify(DADOS_INICIAIS));
+      }
+
+      if (!Array.isArray(estado.bancos)) {
+        estado.bancos = [];
+      }
+
+      if (!Array.isArray(estado.dividas)) {
+        estado.dividas = [];
+      }
+
+      if (!Array.isArray(estado.cartoes)) {
+        estado.cartoes = [];
+      }
+
+      if (!Array.isArray(estado.fixas)) {
+        estado.fixas = [];
+      }
+
+      if (!Array.isArray(estado.variadas)) {
+        estado.variadas = [];
+      }
+
+      if (
+        typeof estado.entradasAcumuladas !== 'number'
+        || Number.isNaN(estado.entradasAcumuladas)
+      ) {
+        estado.entradasAcumuladas = 0;
+      }
     }
 
-    const { data, error } = await supabaseClient
-      .from('cfo_estado')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
 
-    if (error) {
-      console.error('Erro ao consultar estado:', error);
-      return;
+    function numero(valor) {
+
+      const n = Number(valor);
+
+      return Number.isFinite(n) ? n : 0;
     }
 
-    let resultado;
 
-    if (data) {
-      resultado = await supabaseClient
-        .from('cfo_estado')
-        .update({
-          estado: estado,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-    } else {
-      resultado = await supabaseClient
-        .from('cfo_estado')
-        .insert({
-          user_id: userId,
-          estado: estado,
-          updated_at: new Date().toISOString()
-        });
-    }
+    function formatarMoeda(valor) {
 
-    if (resultado.error) {
-      console.error('Erro ao salvar no Supabase:', resultado.error);
-      alert(
-        'Erro ao salvar no banco. Abra o Console (F12) para ver o detalhe.'
+      return numero(valor).toLocaleString(
+        'pt-BR',
+        {
+          style: 'currency',
+          currency: 'BRL'
+        }
       );
-      return;
     }
 
-    console.log('Estado salvo com sucesso no Supabase.');
-    renderizar();
 
-  } catch (erro) {
-    console.error('Erro inesperado ao salvar:', erro);
-    alert('Erro inesperado ao salvar os dados.');
-  }
-}
+    function escaparHTML(valor) {
+
+      return String(valor ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+
+    function obterUserId() {
+
+      let userId = localStorage.getItem(USER_KEY);
+
+      if (!userId) {
+
+        userId = crypto.randomUUID();
+
+        localStorage.setItem(USER_KEY, userId);
+      }
+
+      return userId;
+    }
+
+
+    /* ===========================================================
+       CARREGAR DO SUPABASE
+    =========================================================== */
+
+    async function carregarEstado() {
+
+      try {
+
+        const userId = obterUserId();
+
+        console.log(
+          'Consultando estado do usuário:',
+          userId
+        );
+
+
+        const { data, error } = await supabaseClient
+          .from('cfo_estado')
+          .select('id, estado, updated_at')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+
+        if (error) {
+
+          console.error(
+            'Erro ao carregar estado do Supabase:',
+            error
+          );
+
+          garantirEstruturaEstado();
+
+          renderizar();
+
+          return;
+        }
+
+
+        if (data && data.estado) {
+
+          estado = data.estado;
+
+          garantirEstruturaEstado();
+
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(estado)
+          );
+
+          console.log(
+            'Dados carregados do Supabase com sucesso.'
+          );
+
+        } else {
+
+          garantirEstruturaEstado();
+
+          console.log(
+            'Nenhum registro encontrado no Supabase.'
+          );
+
+          console.log(
+            'Será utilizado o estado local/inicial.'
+          );
+        }
+
+
+        renderizar();
+
+      } catch (erro) {
+
+        console.error(
+          'Erro inesperado ao carregar:',
+          erro
+        );
+
+        garantirEstruturaEstado();
+
+        renderizar();
+      }
+    }
+
+
+    /* ===========================================================
+       SALVAR NO SUPABASE
+    =========================================================== */
+
+    async function salvarEstado() {
+
+      try {
+
+        garantirEstruturaEstado();
+
+
+        /* -------------------------------------------------------
+           1. SALVA LOCALMENTE
+        ------------------------------------------------------- */
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(estado)
+        );
+
+
+        /* -------------------------------------------------------
+           2. OBTÉM IDENTIFICADOR DO USUÁRIO
+        ------------------------------------------------------- */
+
+        const userId = obterUserId();
+
+
+        /* -------------------------------------------------------
+           3. PROCURA REGISTRO NO SUPABASE
+        ------------------------------------------------------- */
+
+        const { data, error } = await supabaseClient
+          .from('cfo_estado')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+
+        if (error) {
+
+          console.error(
+            'Erro ao consultar estado:',
+            error
+          );
+
+          alert(
+            'Não foi possível consultar o banco de dados. Os dados foram mantidos no navegador.'
+          );
+
+          renderizar();
+
+          return;
+        }
+
+
+        let resultado;
+
+
+        /* -------------------------------------------------------
+           4. ATUALIZA OU CRIA
+        ------------------------------------------------------- */
+
+        if (data) {
+
+          resultado = await supabaseClient
+            .from('cfo_estado')
+            .update({
+              estado: estado,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', userId);
+
+        } else {
+
+          resultado = await supabaseClient
+            .from('cfo_estado')
+            .insert({
+              user_id: userId,
+              estado: estado,
+              updated_at: new Date().toISOString()
+            });
+
+        }
+
+
+        /* -------------------------------------------------------
+           5. TRATA ERRO
+        ------------------------------------------------------- */
+
+        if (resultado.error) {
+
+          console.error(
+            'Erro ao salvar no Supabase:',
+            resultado.error
+          );
+
+          alert(
+            'Erro ao salvar no banco de dados. Os dados continuam salvos neste navegador.'
+          );
+
+          renderizar();
+
+          return;
+        }
+
+
+        console.log(
+          'Estado salvo com sucesso no Supabase.'
+        );
+
+
+        renderizar();
+
+      } catch (erro) {
+
+        console.error(
+          'Erro inesperado ao salvar:',
+          erro
+        );
+
+        alert(
+          'Erro inesperado ao salvar os dados.'
+        );
+
+        renderizar();
+      }
+    }
+
+
+    /* ===========================================================
+       RESETAR
+    =========================================================== */
 
     function resetarDados() {
-      if (confirm('Deseja restaurar as configurações originais?')) {
-        estado = JSON.parse(JSON.stringify(DADOS_INICIAIS));
-        editandoId = { divida: null, cartao: null, fixa: null, variada: null };
-        salvarEstado();
+
+      if (
+        !confirm(
+          'Deseja restaurar as configurações originais? Todos os dados atuais serão zerados.'
+        )
+      ) {
+        return;
       }
+
+
+      estado =
+        JSON.parse(
+          JSON.stringify(DADOS_INICIAIS)
+        );
+
+
+      editandoId = {
+        divida: null,
+        cartao: null,
+        fixa: null,
+        variada: null
+      };
+
+
+      salvarEstado();
     }
 
-    function formatarMoeda(v) {
-      return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
 
-    /* 1. CONTAS BANCÁRIAS */
+    /* ===========================================================
+       1. BANCOS
+    =========================================================== */
+
     function atualizarBanco(id, valorStr) {
-      const b = estado.bancos.find(item => item.id === id);
-      if (b) {
-        b.valor = parseFloat(valorStr.replace(',', '.')) || 0;
-        salvarEstado();
+
+      const banco =
+        estado.bancos.find(
+          item => item.id === id
+        );
+
+
+      if (!banco) {
+        return;
       }
+
+
+      banco.valor =
+        parseFloat(
+          String(valorStr).replace(',', '.')
+        ) || 0;
+
+
+      salvarEstado();
     }
+
 
     function atualizarNomeBanco(id, novoNome) {
-      const b = estado.bancos.find(item => item.id === id);
-      if (b && novoNome.trim() !== '') {
-        b.nome = novoNome;
+
+      const banco =
+        estado.bancos.find(
+          item => item.id === id
+        );
+
+
+      if (
+        banco
+        && String(novoNome).trim() !== ''
+      ) {
+
+        banco.nome =
+          String(novoNome).trim();
+
         salvarEstado();
       }
     }
+
 
     function adicionarBanco() {
-      const nome = prompt('Nome do Banco / Conta:') || 'Nova Conta';
-      const valor = parseFloat(prompt('Saldo Atual (ex: -1000 para negativo):', '0')) || 0;
-      estado.bancos.push({ id: Date.now(), nome, valor });
+
+      const nome =
+        prompt(
+          'Nome do Banco / Conta:'
+        );
+
+
+      if (nome === null) {
+        return;
+      }
+
+
+      const valorTexto =
+        prompt(
+          'Saldo Atual (ex: -1000 para negativo):',
+          '0'
+        );
+
+
+      if (valorTexto === null) {
+        return;
+      }
+
+
+      const valor =
+        parseFloat(
+          valorTexto.replace(',', '.')
+        ) || 0;
+
+
+      estado.bancos.push({
+        id: Date.now(),
+        nome:
+          nome.trim() || 'Nova Conta',
+        valor: valor
+      });
+
+
       salvarEstado();
     }
+
 
     function deletarBanco(id) {
-      estado.bancos = estado.bancos.filter(b => b.id !== id);
+
+      if (
+        !confirm(
+          'Deseja excluir esta conta bancária?'
+        )
+      ) {
+        return;
+      }
+
+
+      estado.bancos =
+        estado.bancos.filter(
+          b => b.id !== id
+        );
+
+
       salvarEstado();
     }
+
 
     function adicionarEntrada() {
-      const v = parseFloat(prompt('Valor da Entrada / Aporte para abater o saldo negativo (R$):', '0')) || 0;
-      estado.entradasAcumuladas += v;
+
+      const valorTexto =
+        prompt(
+          'Valor da Entrada / Aporte para abater o saldo negativo (R$):',
+          '0'
+        );
+
+
+      if (valorTexto === null) {
+        return;
+      }
+
+
+      const valor =
+        parseFloat(
+          valorTexto.replace(',', '.')
+        ) || 0;
+
+
+      estado.entradasAcumuladas += valor;
+
+
       salvarEstado();
     }
+
 
     function limparEntradas() {
-      if (confirm('Zerar o total de entradas aplicadas?')) {
-        estado.entradasAcumuladas = 0;
-        salvarEstado();
-      }
-    }
 
-    /* 2. DÍVIDA ATIVA (EDIÇÃO E AÇÕES) */
-    function habilitarEdicaoDivida(id) { editandoId.divida = id; renderizar(); }
-    function cancelarEdicaoDivida() { editandoId.divida = null; renderizar(); }
-    function salvarEdicaoDivida(id) {
-      const d = estado.dividas.find(item => item.id === id);
-      if (d) {
-        d.credor = document.getElementById(`edit-divida-credor-${id}`).value;
-        d.descricao = document.getElementById(`edit-divida-desc-${id}`).value;
-        d.parcela = parseFloat(document.getElementById(`edit-divida-parcela-${id}`).value) || 0;
-        d.saldoTotal = parseFloat(document.getElementById(`edit-divida-saldo-${id}`).value) || 0;
+      if (
+        !confirm(
+          'Deseja zerar o total de entradas aplicadas?'
+        )
+      ) {
+        return;
       }
-      editandoId.divida = null;
+
+
+      estado.entradasAcumuladas = 0;
+
       salvarEstado();
     }
+
+
+    /* ===========================================================
+       2. DÍVIDAS
+    =========================================================== */
+
+    function habilitarEdicaoDivida(id) {
+
+      editandoId.divida = id;
+
+      renderizar();
+    }
+
+
+    function cancelarEdicaoDivida() {
+
+      editandoId.divida = null;
+
+      renderizar();
+    }
+
+
+    function salvarEdicaoDivida(id) {
+
+      const d =
+        estado.dividas.find(
+          item => item.id === id
+        );
+
+
+      if (!d) {
+        return;
+      }
+
+
+      const credor =
+        document.getElementById(
+          `edit-divida-credor-${id}`
+        );
+
+
+      const descricao =
+        document.getElementById(
+          `edit-divida-desc-${id}`
+        );
+
+
+      const parcela =
+        document.getElementById(
+          `edit-divida-parcela-${id}`
+        );
+
+
+      const saldo =
+        document.getElementById(
+          `edit-divida-saldo-${id}`
+        );
+
+
+      d.credor =
+        credor ? credor.value : d.credor;
+
+
+      d.descricao =
+        descricao ? descricao.value : d.descricao;
+
+
+      d.parcela =
+        parcela
+          ? numero(parcela.value)
+          : d.parcela;
+
+
+      d.saldoTotal =
+        saldo
+          ? numero(saldo.value)
+          : d.saldoTotal;
+
+
+      editandoId.divida = null;
+
+      salvarEstado();
+    }
+
 
     function adicionarDivida() {
-      const credor = prompt('Credor / Banco:') || 'Novo Credor';
-      const descricao = prompt('Descrição / Contrato:') || 'Empréstimo/Financiamento';
-      const parcela = parseFloat(prompt('Valor Parcela Mensal (R$):', '0')) || 0;
-      const saldoTotal = parseFloat(prompt('Saldo Devedor Total (R$):', '0')) || 0;
-      estado.dividas.push({ id: Date.now(), credor, descricao, parcela, saldoTotal });
+
+      const credor =
+        prompt(
+          'Credor / Banco:'
+        );
+
+
+      if (credor === null) {
+        return;
+      }
+
+
+      const descricao =
+        prompt(
+          'Descrição / Contrato:'
+        );
+
+
+      if (descricao === null) {
+        return;
+      }
+
+
+      const parcelaTexto =
+        prompt(
+          'Valor Parcela Mensal (R$):',
+          '0'
+        );
+
+
+      if (parcelaTexto === null) {
+        return;
+      }
+
+
+      const saldoTexto =
+        prompt(
+          'Saldo Devedor Total (R$):',
+          '0'
+        );
+
+
+      if (saldoTexto === null) {
+        return;
+      }
+
+
+      estado.dividas.push({
+
+        id: Date.now(),
+
+        credor:
+          credor.trim()
+          || 'Novo Credor',
+
+        descricao:
+          descricao.trim()
+          || 'Empréstimo/Financiamento',
+
+        parcela:
+          parseFloat(
+            parcelaTexto.replace(',', '.')
+          ) || 0,
+
+        saldoTotal:
+          parseFloat(
+            saldoTexto.replace(',', '.')
+          ) || 0
+      });
+
+
       salvarEstado();
     }
+
 
     function deletarDivida(id) {
-      estado.dividas = estado.dividas.filter(d => d.id !== id);
+
+      if (
+        !confirm(
+          'Deseja excluir esta dívida?'
+        )
+      ) {
+        return;
+      }
+
+
+      estado.dividas =
+        estado.dividas.filter(
+          d => d.id !== id
+        );
+
+
       salvarEstado();
     }
 
-    /* 3. CARTÕES DE CRÉDITO (EDIÇÃO E AÇÕES) */
-    function habilitarEdicaoCartao(id) { editandoId.cartao = id; renderizar(); }
-    function cancelarEdicaoCartao() { editandoId.cartao = null; renderizar(); }
-    function salvarEdicaoCartao(id) {
-      const c = estado.cartoes.find(item => item.id === id);
-      if (c) {
-        c.cartao = document.getElementById(`edit-cartao-nome-${id}`).value;
-        c.titular = document.getElementById(`edit-cartao-titular-${id}`).value;
-        c.vencimento = document.getElementById(`edit-cartao-venc-${id}`).value;
-        c.fatura = parseFloat(document.getElementById(`edit-cartao-fatura-${id}`).value) || 0;
-      }
+
+    /* ===========================================================
+       3. CARTÕES
+    =========================================================== */
+
+    function habilitarEdicaoCartao(id) {
+
+      editandoId.cartao = id;
+
+      renderizar();
+    }
+
+
+    function cancelarEdicaoCartao() {
+
       editandoId.cartao = null;
+
+      renderizar();
+    }
+
+
+    function salvarEdicaoCartao(id) {
+
+      const c =
+        estado.cartoes.find(
+          item => item.id === id
+        );
+
+
+      if (!c) {
+        return;
+      }
+
+
+      const nome =
+        document.getElementById(
+          `edit-cartao-nome-${id}`
+        );
+
+
+      const titular =
+        document.getElementById(
+          `edit-cartao-titular-${id}`
+        );
+
+
+      const vencimento =
+        document.getElementById(
+          `edit-cartao-venc-${id}`
+        );
+
+
+      const fatura =
+        document.getElementById(
+          `edit-cartao-fatura-${id}`
+        );
+
+
+      c.cartao =
+        nome ? nome.value : c.cartao;
+
+
+      c.titular =
+        titular ? titular.value : c.titular;
+
+
+      c.vencimento =
+        vencimento
+          ? vencimento.value
+          : c.vencimento;
+
+
+      c.fatura =
+        fatura
+          ? numero(fatura.value)
+          : c.fatura;
+
+
+      editandoId.cartao = null;
+
       salvarEstado();
     }
+
 
     function adicionarCartao() {
-      const cartao = prompt('Cartão / Instituição:') || 'Novo Cartão';
-      const titular = prompt('Titular:') || 'PF/PJ';
-      const vencimento = prompt('Vencimento (ex: Dia 10):') || 'Dia 10';
-      const fatura = parseFloat(prompt('Valor da Fatura Devida (R$):', '0')) || 0;
-      estado.cartoes.push({ id: Date.now(), cartao, titular, vencimento, fatura });
+
+      const cartao =
+        prompt(
+          'Cartão / Instituição:'
+        );
+
+
+      if (cartao === null) {
+        return;
+      }
+
+
+      const titular =
+        prompt(
+          'Titular:'
+        );
+
+
+      if (titular === null) {
+        return;
+      }
+
+
+      const vencimento =
+        prompt(
+          'Vencimento (ex: Dia 10):'
+        );
+
+
+      if (vencimento === null) {
+        return;
+      }
+
+
+      const faturaTexto =
+        prompt(
+          'Valor da Fatura Devida (R$):',
+          '0'
+        );
+
+
+      if (faturaTexto === null) {
+        return;
+      }
+
+
+      estado.cartoes.push({
+
+        id: Date.now(),
+
+        cartao:
+          cartao.trim()
+          || 'Novo Cartão',
+
+        titular:
+          titular.trim()
+          || 'PF/PJ',
+
+        vencimento:
+          vencimento.trim()
+          || 'Dia 10',
+
+        fatura:
+          parseFloat(
+            faturaTexto.replace(',', '.')
+          ) || 0
+      });
+
+
       salvarEstado();
     }
+
 
     function deletarCartao(id) {
-      estado.cartoes = estado.cartoes.filter(c => c.id !== id);
+
+      if (
+        !confirm(
+          'Deseja excluir este cartão?'
+        )
+      ) {
+        return;
+      }
+
+
+      estado.cartoes =
+        estado.cartoes.filter(
+          c => c.id !== id
+        );
+
+
       salvarEstado();
     }
 
-    /* 4. DESPESAS FIXAS (EDIÇÃO E AÇÕES) */
-    function habilitarEdicaoFixa(id) { editandoId.fixa = id; renderizar(); }
-    function cancelarEdicaoFixa() { editandoId.fixa = null; renderizar(); }
-    function salvarEdicaoFixa(id) {
-      const f = estado.fixas.find(item => item.id === id);
-      if (f) {
-        f.descricao = document.getElementById(`edit-fixa-desc-${id}`).value;
-        f.dia = document.getElementById(`edit-fixa-dia-${id}`).value;
-        f.valor = parseFloat(document.getElementById(`edit-fixa-valor-${id}`).value) || 0;
-        f.status = document.getElementById(`edit-fixa-status-${id}`).value;
-      }
+
+    /* ===========================================================
+       4. FIXAS
+    =========================================================== */
+
+    function habilitarEdicaoFixa(id) {
+
+      editandoId.fixa = id;
+
+      renderizar();
+    }
+
+
+    function cancelarEdicaoFixa() {
+
       editandoId.fixa = null;
+
+      renderizar();
+    }
+
+
+    function salvarEdicaoFixa(id) {
+
+      const f =
+        estado.fixas.find(
+          item => item.id === id
+        );
+
+
+      if (!f) {
+        return;
+      }
+
+
+      const descricao =
+        document.getElementById(
+          `edit-fixa-desc-${id}`
+        );
+
+
+      const dia =
+        document.getElementById(
+          `edit-fixa-dia-${id}`
+        );
+
+
+      const valor =
+        document.getElementById(
+          `edit-fixa-valor-${id}`
+        );
+
+
+      const status =
+        document.getElementById(
+          `edit-fixa-status-${id}`
+        );
+
+
+      f.descricao =
+        descricao
+          ? descricao.value
+          : f.descricao;
+
+
+      f.dia =
+        dia
+          ? dia.value
+          : f.dia;
+
+
+      f.valor =
+        valor
+          ? numero(valor.value)
+          : f.valor;
+
+
+      f.status =
+        status
+          ? status.value
+          : f.status;
+
+
+      editandoId.fixa = null;
+
       salvarEstado();
     }
+
 
     function adicionarFixa() {
-      const descricao = prompt('Descrição da Despesa Fixa:') || 'Nova Despesa';
-      const dia = prompt('Dia do Vencimento:', '10') || '10';
-      const valor = parseFloat(prompt('Valor Mensal (R$):', '0')) || 0;
-      estado.fixas.push({ id: Date.now(), descricao, dia, valor, status: 'Pendente' });
+
+      const descricao =
+        prompt(
+          'Descrição da Despesa Fixa:'
+        );
+
+
+      if (descricao === null) {
+        return;
+      }
+
+
+      const dia =
+        prompt(
+          'Dia do Vencimento:',
+          '10'
+        );
+
+
+      if (dia === null) {
+        return;
+      }
+
+
+      const valorTexto =
+        prompt(
+          'Valor Mensal (R$):',
+          '0'
+        );
+
+
+      if (valorTexto === null) {
+        return;
+      }
+
+
+      estado.fixas.push({
+
+        id: Date.now(),
+
+        descricao:
+          descricao.trim()
+          || 'Nova Despesa',
+
+        dia:
+          dia.trim()
+          || '10',
+
+        valor:
+          parseFloat(
+            valorTexto.replace(',', '.')
+          ) || 0,
+
+        status:
+          'Pendente'
+      });
+
+
       salvarEstado();
     }
+
 
     function deletarFixa(id) {
-      estado.fixas = estado.fixas.filter(f => f.id !== id);
+
+      if (
+        !confirm(
+          'Deseja excluir esta despesa fixa?'
+        )
+      ) {
+        return;
+      }
+
+
+      estado.fixas =
+        estado.fixas.filter(
+          f => f.id !== id
+        );
+
+
       salvarEstado();
     }
 
-    /* 5. DESPESAS VARIADAS (EDIÇÃO E AÇÕES) */
-    function habilitarEdicaoVariada(id) { editandoId.variada = id; renderizar(); }
-    function cancelarEdicaoVariada() { editandoId.variada = null; renderizar(); }
-    function salvarEdicaoVariada(id) {
-      const v = estado.variadas.find(item => item.id === id);
-      if (v) {
-        v.descricao = document.getElementById(`edit-variada-desc-${id}`).value;
-        v.data = document.getElementById(`edit-variada-data-${id}`).value;
-        v.valor = parseFloat(document.getElementById(`edit-variada-valor-${id}`).value) || 0;
-        v.status = document.getElementById(`edit-variada-status-${id}`).value;
-      }
+
+    /* ===========================================================
+       5. VARIADAS
+    =========================================================== */
+
+    function habilitarEdicaoVariada(id) {
+
+      editandoId.variada = id;
+
+      renderizar();
+    }
+
+
+    function cancelarEdicaoVariada() {
+
       editandoId.variada = null;
+
+      renderizar();
+    }
+
+
+    function salvarEdicaoVariada(id) {
+
+      const v =
+        estado.variadas.find(
+          item => item.id === id
+        );
+
+
+      if (!v) {
+        return;
+      }
+
+
+      const descricao =
+        document.getElementById(
+          `edit-variada-desc-${id}`
+        );
+
+
+      const data =
+        document.getElementById(
+          `edit-variada-data-${id}`
+        );
+
+
+      const valor =
+        document.getElementById(
+          `edit-variada-valor-${id}`
+        );
+
+
+      const status =
+        document.getElementById(
+          `edit-variada-status-${id}`
+        );
+
+
+      v.descricao =
+        descricao
+          ? descricao.value
+          : v.descricao;
+
+
+      v.data =
+        data
+          ? data.value
+          : v.data;
+
+
+      v.valor =
+        valor
+          ? numero(valor.value)
+          : v.valor;
+
+
+      v.status =
+        status
+          ? status.value
+          : v.status;
+
+
+      editandoId.variada = null;
+
       salvarEstado();
     }
+
 
     function adicionarVariada() {
-      const descricao = prompt('Descrição do Gasto:') || 'Gasto Variado';
-      const data = prompt('Data (AAAA-MM-DD):', new Date().toISOString().split('T')[0]);
-      const valor = parseFloat(prompt('Valor (R$):', '0')) || 0;
-      estado.variadas.push({ id: Date.now(), descricao, data, valor, status: 'Pendente' });
+
+      const descricao =
+        prompt(
+          'Descrição do Gasto:'
+        );
+
+
+      if (descricao === null) {
+        return;
+      }
+
+
+      const data =
+        prompt(
+          'Data (AAAA-MM-DD):',
+          new Date()
+            .toISOString()
+            .split('T')[0]
+        );
+
+
+      if (data === null) {
+        return;
+      }
+
+
+      const valorTexto =
+        prompt(
+          'Valor (R$):',
+          '0'
+        );
+
+
+      if (valorTexto === null) {
+        return;
+      }
+
+
+      estado.variadas.push({
+
+        id: Date.now(),
+
+        descricao:
+          descricao.trim()
+          || 'Gasto Variado',
+
+        data:
+          data,
+
+        valor:
+          parseFloat(
+            valorTexto.replace(',', '.')
+          ) || 0,
+
+        status:
+          'Pendente'
+      });
+
+
       salvarEstado();
     }
+
 
     function deletarVariada(id) {
-      estado.variadas = estado.variadas.filter(v => v.id !== id);
+
+      if (
+        !confirm(
+          'Deseja excluir esta despesa variada?'
+        )
+      ) {
+        return;
+      }
+
+
+      estado.variadas =
+        estado.variadas.filter(
+          v => v.id !== id
+        );
+
+
       salvarEstado();
     }
 
-    /* EXPORTAÇÃO E IMPORTAÇÃO BPO */
+
+    /* ===========================================================
+       EXPORTAR JSON
+    =========================================================== */
+
     function exportarJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estado, null, 2));
-      const anchor = document.createElement('a');
-      anchor.setAttribute("href", dataStr);
-      anchor.setAttribute("download", `Painel_CFO_5Categorias_${new Date().toISOString().split('T')[0]}.json`);
+
+      const dataStr =
+        'data:application/json;charset=utf-8,'
+        + encodeURIComponent(
+            JSON.stringify(
+              estado,
+              null,
+              2
+            )
+          );
+
+
+      const anchor =
+        document.createElement('a');
+
+
+      anchor.setAttribute(
+        'href',
+        dataStr
+      );
+
+
+      anchor.setAttribute(
+        'download',
+        `Painel_CFO_5Categorias_${new Date().toISOString().split('T')[0]}.json`
+      );
+
+
+      document.body.appendChild(anchor);
+
       anchor.click();
+
       anchor.remove();
     }
 
-    function exportarCSV() {
-      let csv = "data:text/csv;charset=utf-8,\uFEFFCategoria;Item;Detalhe;Valor Devido / Saldo\n";
 
-      estado.bancos.forEach(b => csv += `1. Contas Bancarias;${b.nome};Saldo Atual;${b.valor}\n`);
-      csv += `1. Contas Bancarias;Abatimento de Entradas;Aportes;${estado.entradasAcumuladas}\n`;
-      estado.dividas.forEach(d => csv += `2. Divida Ativa;${d.credor};${d.descricao};${d.saldoTotal}\n`);
-      estado.cartoes.forEach(c => csv += `3. Cartoes de Credito;${c.cartao} (${c.titular});Fatura;${c.fatura}\n`);
-      estado.fixas.forEach(f => csv += `4. Despesas Fixas;${f.descricao};Dia ${f.dia};${f.valor}\n`);
-      estado.variadas.forEach(v => csv += `5. Despesas Variadas;${v.descricao};${v.data};${v.valor}\n`);
+    /* ===========================================================
+       EXPORTAR CSV
+    =========================================================== */
 
-      const encodedUri = encodeURI(csv);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Relatorio_CFO_Categorizado_${new Date().toISOString().split('T')[0]}.csv`);
-      link.click();
-      link.remove();
+    function escaparCSV(valor) {
+
+      const texto =
+        String(valor ?? '');
+
+
+      return `"${texto.replace(/"/g, '""')}"`;
     }
+
+
+    function exportarCSV() {
+
+      let csv =
+        '\uFEFFCategoria;Item;Detalhe;Valor Devido / Saldo\n';
+
+
+      estado.bancos.forEach(b => {
+
+        csv +=
+          [
+            '1. Contas Bancarias',
+            b.nome,
+            'Saldo Atual',
+            b.valor
+          ]
+          .map(escaparCSV)
+          .join(';')
+          + '\n';
+
+      });
+
+
+      csv +=
+        [
+          '1. Contas Bancarias',
+          'Abatimento de Entradas',
+          'Aportes',
+          estado.entradasAcumuladas
+        ]
+        .map(escaparCSV)
+        .join(';')
+        + '\n';
+
+
+      estado.dividas.forEach(d => {
+
+        csv +=
+          [
+            '2. Divida Ativa',
+            d.credor,
+            d.descricao,
+            d.saldoTotal
+          ]
+          .map(escaparCSV)
+          .join(';')
+          + '\n';
+
+      });
+
+
+      estado.cartoes.forEach(c => {
+
+        csv +=
+          [
+            '3. Cartoes de Credito',
+            `${c.cartao} (${c.titular})`,
+            'Fatura',
+            c.fatura
+          ]
+          .map(escaparCSV)
+          .join(';')
+          + '\n';
+
+      });
+
+
+      estado.fixas.forEach(f => {
+
+        csv +=
+          [
+            '4. Despesas Fixas',
+            f.descricao,
+            `Dia ${f.dia}`,
+            f.valor
+          ]
+          .map(escaparCSV)
+          .join(';')
+          + '\n';
+
+      });
+
+
+      estado.variadas.forEach(v => {
+
+        csv +=
+          [
+            '5. Despesas Variadas',
+            v.descricao,
+            v.data,
+            v.valor
+          ]
+          .map(escaparCSV)
+          .join(';')
+          + '\n';
+
+      });
+
+
+      const blob =
+        new Blob(
+          [csv],
+          {
+            type: 'text/csv;charset=utf-8;'
+          }
+        );
+
+
+      const url =
+        URL.createObjectURL(blob);
+
+
+      const link =
+        document.createElement('a');
+
+
+      link.href = url;
+
+
+      link.download =
+        `Relatorio_CFO_Categorizado_${new Date().toISOString().split('T')[0]}.csv`;
+
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    }
+
+
+    /* ===========================================================
+       IMPORTAR JSON
+    =========================================================== */
 
     function importarDados(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          estado = JSON.parse(e.target.result);
-          salvarEstado();
-          alert('Dados importados com sucesso!');
-        } catch (err) {
-          alert('Arquivo JSON inválido.');
-        }
-      };
+
+      const file =
+        event.target.files[0];
+
+
+      if (!file) {
+        return;
+      }
+
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(e) {
+
+          try {
+
+            const dados =
+              JSON.parse(
+                e.target.result
+              );
+
+
+            estado = dados;
+
+            garantirEstruturaEstado();
+
+            salvarEstado();
+
+
+            alert(
+              'Dados importados com sucesso!'
+            );
+
+          } catch (err) {
+
+            console.error(err);
+
+            alert(
+              'Arquivo JSON inválido.'
+            );
+          }
+
+        };
+
+
       reader.readAsText(file);
+
+
+      event.target.value = '';
     }
 
-    /* RENDERIZAÇÃO GERAL */
+
+    /* ===========================================================
+       RENDERIZAÇÃO
+    =========================================================== */
+
     function renderizar() {
-      // 1. Bancos
-      const gridBancos = document.getElementById('gridBancos');
-      gridBancos.innerHTML = estado.bancos.map(b => `
-        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-          <div class="flex justify-between items-center mb-1 gap-1">
-            <input type="text" value="${b.nome}" onchange="atualizarNomeBanco(${b.id}, this.value)" class="text-xs font-semibold text-slate-600 bg-transparent hover:bg-white px-1 rounded border border-transparent hover:border-slate-300 w-full">
-            <button onclick="deletarBanco(${b.id})" class="text-[10px] text-rose-600 hover:underline">Excluir</button>
+
+      garantirEstruturaEstado();
+
+
+      /* =========================================================
+         1. BANCOS
+      ========================================================= */
+
+      const gridBancos =
+        document.getElementById(
+          'gridBancos'
+        );
+
+
+      gridBancos.innerHTML =
+        estado.bancos.map(b => `
+
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+
+            <div class="flex justify-between items-center mb-1 gap-1">
+
+              <input
+                type="text"
+                value="${escaparHTML(b.nome)}"
+                onchange="atualizarNomeBanco(${b.id}, this.value)"
+                class="text-xs font-semibold text-slate-600 bg-transparent hover:bg-white px-1 rounded border border-transparent hover:border-slate-300 w-full"
+              >
+
+              <button
+                onclick="deletarBanco(${b.id})"
+                class="text-[10px] text-rose-600 hover:underline"
+              >
+                Excluir
+              </button>
+
+            </div>
+
+
+            <input
+              type="number"
+              step="0.01"
+              value="${numero(b.valor)}"
+              onchange="atualizarBanco(${b.id}, this.value)"
+              class="w-full text-sm font-bold bg-white border border-slate-300 rounded px-2 py-1 ${
+                numero(b.valor) < 0
+                  ? 'text-rose-600'
+                  : 'text-emerald-600'
+              }"
+            >
+
           </div>
-          <input type="number" step="0.01" value="${b.valor}" 
-            onchange="atualizarBanco(${b.id}, this.value)"
-            class="w-full text-sm font-bold bg-white border border-slate-300 rounded px-2 py-1 ${b.valor < 0 ? 'text-rose-600' : 'text-emerald-600'}">
-        </div>
-      `).join('');
 
-      document.getElementById('txtTotalEntradas').innerText = formatarMoeda(estado.entradasAcumuladas);
-      const somaBancosNegativos = estado.bancos.reduce((acc, b) => acc + b.valor, 0);
-      const saldoBancosComEntrada = somaBancosNegativos + estado.entradasAcumuladas;
+        `).join('');
 
-      // 2. Dívidas
-      document.getElementById('tabelaDividas').innerHTML = estado.dividas.map(d => {
-        if (editandoId.divida === d.id) {
+
+      document.getElementById(
+        'txtTotalEntradas'
+      ).innerText =
+        formatarMoeda(
+          estado.entradasAcumuladas
+        );
+
+
+      const somaBancos =
+        estado.bancos.reduce(
+          (acc, b) =>
+            acc + numero(b.valor),
+          0
+        );
+
+
+      const saldoBancosComEntrada =
+        somaBancos
+        + numero(
+            estado.entradasAcumuladas
+          );
+
+
+      /* =========================================================
+         2. DÍVIDAS
+      ========================================================= */
+
+      document.getElementById(
+        'tabelaDividas'
+      ).innerHTML =
+
+        estado.dividas.map(d => {
+
+          if (
+            editandoId.divida === d.id
+          ) {
+
+            return `
+
+              <tr class="bg-blue-50">
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-divida-credor-${d.id}"
+                    value="${escaparHTML(d.credor)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-divida-desc-${d.id}"
+                    value="${escaparHTML(d.descricao)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="edit-divida-parcela-${d.id}"
+                    value="${numero(d.parcela)}"
+                    class="text-xs border p-1 rounded w-24"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="edit-divida-saldo-${d.id}"
+                    value="${numero(d.saldoTotal)}"
+                    class="text-xs border p-1 rounded w-28"
+                  >
+
+                </td>
+
+
+                <td class="p-2 text-center space-x-1">
+
+                  <button
+                    onclick="salvarEdicaoDivida(${d.id})"
+                    class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"
+                  >
+                    Salvar
+                  </button>
+
+                  <button
+                    onclick="cancelarEdicaoDivida()"
+                    class="text-xs bg-slate-400 text-white px-2 py-1 rounded"
+                  >
+                    Sair
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `;
+          }
+
+
           return `
-            <tr class="bg-blue-50">
-              <td class="p-2"><input type="text" id="edit-divida-credor-${d.id}" value="${d.credor}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="text" id="edit-divida-desc-${d.id}" value="${d.descricao}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="number" step="0.01" id="edit-divida-parcela-${d.id}" value="${d.parcela}" class="text-xs border p-1 rounded w-24"></td>
-              <td class="p-2"><input type="number" step="0.01" id="edit-divida-saldo-${d.id}" value="${d.saldoTotal}" class="text-xs border p-1 rounded w-28"></td>
-              <td class="p-2 text-center space-x-1">
-                <button onclick="salvarEdicaoDivida(${d.id})" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded">Salvar</button>
-                <button onclick="cancelarEdicaoDivida()" class="text-xs bg-slate-400 text-white px-2 py-1 rounded">Sair</button>
-              </td>
-            </tr>
-          `;
-        }
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-semibold text-slate-900">${d.credor}</td>
-            <td class="p-3 text-slate-600">${d.descricao}</td>
-            <td class="p-3">${formatarMoeda(d.parcela)}</td>
-            <td class="p-3 font-bold text-rose-600">${formatarMoeda(d.saldoTotal)}</td>
-            <td class="p-3 text-center space-x-2">
-              <button onclick="habilitarEdicaoDivida(${d.id})" class="text-xs text-blue-600 hover:underline">Editar</button>
-              <button onclick="deletarDivida(${d.id})" class="text-xs text-rose-600 hover:underline">Excluir</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
 
-      // 3. Cartões
-      document.getElementById('tabelaCartoes').innerHTML = estado.cartoes.map(c => {
-        if (editandoId.cartao === c.id) {
+            <tr class="hover:bg-slate-50">
+
+              <td class="p-3 font-semibold text-slate-900">
+                ${escaparHTML(d.credor)}
+              </td>
+
+              <td class="p-3 text-slate-600">
+                ${escaparHTML(d.descricao)}
+              </td>
+
+              <td class="p-3">
+                ${formatarMoeda(d.parcela)}
+              </td>
+
+              <td class="p-3 font-bold text-rose-600">
+                ${formatarMoeda(d.saldoTotal)}
+              </td>
+
+              <td class="p-3 text-center space-x-2">
+
+                <button
+                  onclick="habilitarEdicaoDivida(${d.id})"
+                  class="text-xs text-blue-600 hover:underline"
+                >
+                  Editar
+                </button>
+
+                <button
+                  onclick="deletarDivida(${d.id})"
+                  class="text-xs text-rose-600 hover:underline"
+                >
+                  Excluir
+                </button>
+
+              </td>
+
+            </tr>
+
+          `;
+
+        }).join('');
+
+
+      /* =========================================================
+         3. CARTÕES
+      ========================================================= */
+
+      document.getElementById(
+        'tabelaCartoes'
+      ).innerHTML =
+
+        estado.cartoes.map(c => {
+
+          if (
+            editandoId.cartao === c.id
+          ) {
+
+            return `
+
+              <tr class="bg-blue-50">
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-cartao-nome-${c.id}"
+                    value="${escaparHTML(c.cartao)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-cartao-titular-${c.id}"
+                    value="${escaparHTML(c.titular)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-cartao-venc-${c.id}"
+                    value="${escaparHTML(c.vencimento)}"
+                    class="text-xs border p-1 rounded w-20"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="edit-cartao-fatura-${c.id}"
+                    value="${numero(c.fatura)}"
+                    class="text-xs border p-1 rounded w-28"
+                  >
+
+                </td>
+
+
+                <td class="p-2 text-center space-x-1">
+
+                  <button
+                    onclick="salvarEdicaoCartao(${c.id})"
+                    class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"
+                  >
+                    Salvar
+                  </button>
+
+                  <button
+                    onclick="cancelarEdicaoCartao()"
+                    class="text-xs bg-slate-400 text-white px-2 py-1 rounded"
+                  >
+                    Sair
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `;
+          }
+
+
           return `
-            <tr class="bg-blue-50">
-              <td class="p-2"><input type="text" id="edit-cartao-nome-${c.id}" value="${c.cartao}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="text" id="edit-cartao-titular-${c.id}" value="${c.titular}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="text" id="edit-cartao-venc-${c.id}" value="${c.vencimento}" class="text-xs border p-1 rounded w-20"></td>
-              <td class="p-2"><input type="number" step="0.01" id="edit-cartao-fatura-${c.id}" value="${c.fatura}" class="text-xs border p-1 rounded w-28"></td>
-              <td class="p-2 text-center space-x-1">
-                <button onclick="salvarEdicaoCartao(${c.id})" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded">Salvar</button>
-                <button onclick="cancelarEdicaoCartao()" class="text-xs bg-slate-400 text-white px-2 py-1 rounded">Sair</button>
-              </td>
-            </tr>
-          `;
-        }
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-semibold text-slate-900">${c.cartao}</td>
-            <td class="p-3 text-slate-600">${c.titular}</td>
-            <td class="p-3 text-slate-500">${c.vencimento}</td>
-            <td class="p-3 font-bold text-amber-600">${formatarMoeda(c.fatura)}</td>
-            <td class="p-3 text-center space-x-2">
-              <button onclick="habilitarEdicaoCartao(${c.id})" class="text-xs text-blue-600 hover:underline">Editar</button>
-              <button onclick="deletarCartao(${c.id})" class="text-xs text-rose-600 hover:underline">Excluir</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
 
-      // 4. Fixas
-      document.getElementById('tabelaFixas').innerHTML = estado.fixas.map(f => {
-        if (editandoId.fixa === f.id) {
+            <tr class="hover:bg-slate-50">
+
+              <td class="p-3 font-semibold text-slate-900">
+                ${escaparHTML(c.cartao)}
+              </td>
+
+              <td class="p-3 text-slate-600">
+                ${escaparHTML(c.titular)}
+              </td>
+
+              <td class="p-3 text-slate-500">
+                ${escaparHTML(c.vencimento)}
+              </td>
+
+              <td class="p-3 font-bold text-amber-600">
+                ${formatarMoeda(c.fatura)}
+              </td>
+
+              <td class="p-3 text-center space-x-2">
+
+                <button
+                  onclick="habilitarEdicaoCartao(${c.id})"
+                  class="text-xs text-blue-600 hover:underline"
+                >
+                  Editar
+                </button>
+
+                <button
+                  onclick="deletarCartao(${c.id})"
+                  class="text-xs text-rose-600 hover:underline"
+                >
+                  Excluir
+                </button>
+
+              </td>
+
+            </tr>
+
+          `;
+
+        }).join('');
+
+
+      /* =========================================================
+         4. FIXAS
+      ========================================================= */
+
+      document.getElementById(
+        'tabelaFixas'
+      ).innerHTML =
+
+        estado.fixas.map(f => {
+
+          if (
+            editandoId.fixa === f.id
+          ) {
+
+            return `
+
+              <tr class="bg-blue-50">
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-fixa-desc-${f.id}"
+                    value="${escaparHTML(f.descricao)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-fixa-dia-${f.id}"
+                    value="${escaparHTML(f.dia)}"
+                    class="text-xs border p-1 rounded w-16"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="edit-fixa-valor-${f.id}"
+                    value="${numero(f.valor)}"
+                    class="text-xs border p-1 rounded w-24"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <select
+                    id="edit-fixa-status-${f.id}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                    <option
+                      value="Pendente"
+                      ${f.status === 'Pendente' ? 'selected' : ''}
+                    >
+                      Pendente
+                    </option>
+
+                    <option
+                      value="Pago"
+                      ${f.status === 'Pago' ? 'selected' : ''}
+                    >
+                      Pago
+                    </option>
+
+                  </select>
+
+                </td>
+
+
+                <td class="p-2 text-center space-x-1">
+
+                  <button
+                    onclick="salvarEdicaoFixa(${f.id})"
+                    class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"
+                  >
+                    Salvar
+                  </button>
+
+                  <button
+                    onclick="cancelarEdicaoFixa()"
+                    class="text-xs bg-slate-400 text-white px-2 py-1 rounded"
+                  >
+                    Sair
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `;
+          }
+
+
           return `
-            <tr class="bg-blue-50">
-              <td class="p-2"><input type="text" id="edit-fixa-desc-${f.id}" value="${f.descricao}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="text" id="edit-fixa-dia-${f.id}" value="${f.dia}" class="text-xs border p-1 rounded w-16"></td>
-              <td class="p-2"><input type="number" step="0.01" id="edit-fixa-valor-${f.id}" value="${f.valor}" class="text-xs border p-1 rounded w-24"></td>
-              <td class="p-2">
-                <select id="edit-fixa-status-${f.id}" class="text-xs border p-1 rounded w-full">
-                  <option value="Pendente" ${f.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                  <option value="Pago" ${f.status === 'Pago' ? 'selected' : ''}>Pago</option>
-                </select>
-              </td>
-              <td class="p-2 text-center space-x-1">
-                <button onclick="salvarEdicaoFixa(${f.id})" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded">Salvar</button>
-                <button onclick="cancelarEdicaoFixa()" class="text-xs bg-slate-400 text-white px-2 py-1 rounded">Sair</button>
-              </td>
-            </tr>
-          `;
-        }
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-semibold text-slate-900">${f.descricao}</td>
-            <td class="p-3 text-slate-500">Dia ${f.dia}</td>
-            <td class="p-3 font-semibold">${formatarMoeda(f.valor)}</td>
-            <td class="p-3"><span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium">${f.status}</span></td>
-            <td class="p-3 text-center space-x-2">
-              <button onclick="habilitarEdicaoFixa(${f.id})" class="text-xs text-blue-600 hover:underline">Editar</button>
-              <button onclick="deletarFixa(${f.id})" class="text-xs text-rose-600 hover:underline">Excluir</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
 
-      // 5. Variadas
-      document.getElementById('tabelaVariadas').innerHTML = estado.variadas.map(v => {
-        if (editandoId.variada === v.id) {
+            <tr class="hover:bg-slate-50">
+
+              <td class="p-3 font-semibold text-slate-900">
+                ${escaparHTML(f.descricao)}
+              </td>
+
+              <td class="p-3 text-slate-500">
+                Dia ${escaparHTML(f.dia)}
+              </td>
+
+              <td class="p-3 font-semibold">
+                ${formatarMoeda(f.valor)}
+              </td>
+
+              <td class="p-3">
+
+                <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium">
+                  ${escaparHTML(f.status)}
+                </span>
+
+              </td>
+
+              <td class="p-3 text-center space-x-2">
+
+                <button
+                  onclick="habilitarEdicaoFixa(${f.id})"
+                  class="text-xs text-blue-600 hover:underline"
+                >
+                  Editar
+                </button>
+
+                <button
+                  onclick="deletarFixa(${f.id})"
+                  class="text-xs text-rose-600 hover:underline"
+                >
+                  Excluir
+                </button>
+
+              </td>
+
+            </tr>
+
+          `;
+
+        }).join('');
+
+
+      /* =========================================================
+         5. VARIADAS
+      ========================================================= */
+
+      document.getElementById(
+        'tabelaVariadas'
+      ).innerHTML =
+
+        estado.variadas.map(v => {
+
+          if (
+            editandoId.variada === v.id
+          ) {
+
+            return `
+
+              <tr class="bg-blue-50">
+
+                <td class="p-2">
+
+                  <input
+                    type="text"
+                    id="edit-variada-desc-${v.id}"
+                    value="${escaparHTML(v.descricao)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="date"
+                    id="edit-variada-data-${v.id}"
+                    value="${escaparHTML(v.data)}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="edit-variada-valor-${v.id}"
+                    value="${numero(v.valor)}"
+                    class="text-xs border p-1 rounded w-24"
+                  >
+
+                </td>
+
+
+                <td class="p-2">
+
+                  <select
+                    id="edit-variada-status-${v.id}"
+                    class="text-xs border p-1 rounded w-full"
+                  >
+
+                    <option
+                      value="Pendente"
+                      ${v.status === 'Pendente' ? 'selected' : ''}
+                    >
+                      Pendente
+                    </option>
+
+                    <option
+                      value="Pago"
+                      ${v.status === 'Pago' ? 'selected' : ''}
+                    >
+                      Pago
+                    </option>
+
+                  </select>
+
+                </td>
+
+
+                <td class="p-2 text-center space-x-1">
+
+                  <button
+                    onclick="salvarEdicaoVariada(${v.id})"
+                    class="text-xs bg-emerald-600 text-white px-2 py-1 rounded"
+                  >
+                    Salvar
+                  </button>
+
+                  <button
+                    onclick="cancelarEdicaoVariada()"
+                    class="text-xs bg-slate-400 text-white px-2 py-1 rounded"
+                  >
+                    Sair
+                  </button>
+
+                </td>
+
+              </tr>
+
+            `;
+          }
+
+
           return `
-            <tr class="bg-blue-50">
-              <td class="p-2"><input type="text" id="edit-variada-desc-${v.id}" value="${v.descricao}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="date" id="edit-variada-data-${v.id}" value="${v.data}" class="text-xs border p-1 rounded w-full"></td>
-              <td class="p-2"><input type="number" step="0.01" id="edit-variada-valor-${v.id}" value="${v.valor}" class="text-xs border p-1 rounded w-24"></td>
-              <td class="p-2">
-                <select id="edit-variada-status-${v.id}" class="text-xs border p-1 rounded w-full">
-                  <option value="Pendente" ${v.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                  <option value="Pago" ${v.status === 'Pago' ? 'selected' : ''}>Pago</option>
-                </select>
+
+            <tr class="hover:bg-slate-50">
+
+              <td class="p-3 font-semibold text-slate-900">
+                ${escaparHTML(v.descricao)}
               </td>
-              <td class="p-2 text-center space-x-1">
-                <button onclick="salvarEdicaoVariada(${v.id})" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded">Salvar</button>
-                <button onclick="cancelarEdicaoVariada()" class="text-xs bg-slate-400 text-white px-2 py-1 rounded">Sair</button>
+
+              <td class="p-3 text-slate-500">
+                ${escaparHTML(v.data)}
               </td>
+
+              <td class="p-3 font-semibold">
+                ${formatarMoeda(v.valor)}
+              </td>
+
+              <td class="p-3">
+
+                <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium">
+                  ${escaparHTML(v.status)}
+                </span>
+
+              </td>
+
+              <td class="p-3 text-center space-x-2">
+
+                <button
+                  onclick="habilitarEdicaoVariada(${v.id})"
+                  class="text-xs text-blue-600 hover:underline"
+                >
+                  Editar
+                </button>
+
+                <button
+                  onclick="deletarVariada(${v.id})"
+                  class="text-xs text-rose-600 hover:underline"
+                >
+                  Excluir
+                </button>
+
+              </td>
+
             </tr>
+
           `;
-        }
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-semibold text-slate-900">${v.descricao}</td>
-            <td class="p-3 text-slate-500">${v.data}</td>
-            <td class="p-3 font-semibold">${formatarMoeda(v.valor)}</td>
-            <td class="p-3"><span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium">${v.status}</span></td>
-            <td class="p-3 text-center space-x-2">
-              <button onclick="habilitarEdicaoVariada(${v.id})" class="text-xs text-blue-600 hover:underline">Editar</button>
-              <button onclick="deletarVariada(${v.id})" class="text-xs text-rose-600 hover:underline">Excluir</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
 
-      // TOTAIS
-      const totalDividas = estado.dividas.reduce((a, b) => a + b.saldoTotal, 0);
-      const totalCartoes = estado.cartoes.reduce((a, b) => a + b.fatura, 0);
-      const totalFixas = estado.fixas.reduce((a, b) => a + b.valor, 0);
-      const totalVariadas = estado.variadas.reduce((a, b) => a + b.valor, 0);
+        }).join('');
 
-      document.getElementById('totalCatBancos').innerText = formatarMoeda(saldoBancosComEntrada);
-      document.getElementById('totalCatBancos').className = saldoBancosComEntrada < 0 ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold';
 
-      document.getElementById('totalCatDividas').innerText = formatarMoeda(totalDividas);
-      document.getElementById('totalCatCartoes').innerText = formatarMoeda(totalCartoes);
-      document.getElementById('totalCatFixas').innerText = formatarMoeda(totalFixas);
-      document.getElementById('totalCatVariadas').innerText = formatarMoeda(totalVariadas);
+      /* =========================================================
+         TOTAIS
+      ========================================================= */
 
-      // Cards
-      document.getElementById('cardBancos').innerText = formatarMoeda(saldoBancosComEntrada);
-      document.getElementById('cardBancos').className = `text-lg font-bold mt-1 ${saldoBancosComEntrada < 0 ? 'text-rose-600' : 'text-emerald-600'}`;
+      const totalDividas =
+        estado.dividas.reduce(
+          (total, item) =>
+            total + numero(item.saldoTotal),
+          0
+        );
 
-      document.getElementById('cardDividas').innerText = formatarMoeda(totalDividas);
-      document.getElementById('cardCartoes').innerText = formatarMoeda(totalCartoes);
-      document.getElementById('cardFixas').innerText = formatarMoeda(totalFixas);
 
-      // Total Devido Geral
-      const passivoBancos = saldoBancosComEntrada < 0 ? Math.abs(saldoBancosComEntrada) : 0;
-      const totalDevidoGeral = passivoBancos + totalDividas + totalCartoes + totalFixas + totalVariadas;
+      const totalCartoes =
+        estado.cartoes.reduce(
+          (total, item) =>
+            total + numero(item.fatura),
+          0
+        );
 
-      document.getElementById('cardTotalGeral').innerText = formatarMoeda(totalDevidoGeral);
+
+      const totalFixas =
+        estado.fixas.reduce(
+          (total, item) =>
+            total + numero(item.valor),
+          0
+        );
+
+
+      const totalVariadas =
+        estado.variadas.reduce(
+          (total, item) =>
+            total + numero(item.valor),
+          0
+        );
+
+
+      /* =========================================================
+         TOTAIS DAS CATEGORIAS
+      ========================================================= */
+
+      const totalBancoElement =
+        document.getElementById(
+          'totalCatBancos'
+        );
+
+
+      totalBancoElement.innerText =
+        formatarMoeda(
+          saldoBancosComEntrada
+        );
+
+
+      totalBancoElement.className =
+        saldoBancosComEntrada < 0
+          ? 'text-rose-600 font-bold'
+          : 'text-emerald-600 font-bold';
+
+
+      document.getElementById(
+        'totalCatDividas'
+      ).innerText =
+        formatarMoeda(
+          totalDividas
+        );
+
+
+      document.getElementById(
+        'totalCatCartoes'
+      ).innerText =
+        formatarMoeda(
+          totalCartoes
+        );
+
+
+      document.getElementById(
+        'totalCatFixas'
+      ).innerText =
+        formatarMoeda(
+          totalFixas
+        );
+
+
+      document.getElementById(
+        'totalCatVariadas'
+      ).innerText =
+        formatarMoeda(
+          totalVariadas
+        );
+
+
+      /* =========================================================
+         CARDS
+      ========================================================= */
+
+      const cardBancos =
+        document.getElementById(
+          'cardBancos'
+        );
+
+
+      cardBancos.innerText =
+        formatarMoeda(
+          saldoBancosComEntrada
+        );
+
+
+      cardBancos.className =
+        `text-lg font-bold mt-1 ${
+          saldoBancosComEntrada < 0
+            ? 'text-rose-600'
+            : 'text-emerald-600'
+        }`;
+
+
+      document.getElementById(
+        'cardDividas'
+      ).innerText =
+        formatarMoeda(
+          totalDividas
+        );
+
+
+      document.getElementById(
+        'cardCartoes'
+      ).innerText =
+        formatarMoeda(
+          totalCartoes
+        );
+
+
+      document.getElementById(
+        'cardFixas'
+      ).innerText =
+        formatarMoeda(
+          totalFixas
+        );
+
+
+      /* =========================================================
+         TOTAL GERAL
+      ========================================================= */
+
+      const passivoBancos =
+        saldoBancosComEntrada < 0
+          ? Math.abs(
+              saldoBancosComEntrada
+            )
+          : 0;
+
+
+      const totalDevidoGeral =
+        passivoBancos
+        + totalDividas
+        + totalCartoes
+        + totalFixas
+        + totalVariadas;
+
+
+      document.getElementById(
+        'cardTotalGeral'
+      ).innerText =
+        formatarMoeda(
+          totalDevidoGeral
+        );
     }
 
-    renderizar();
+
+    /* ===========================================================
+       INICIALIZAÇÃO
+    =========================================================== */
+
+    garantirEstruturaEstado();
+
+    carregarEstado();
+
   </script>
+
 </body>
 </html>
