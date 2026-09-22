@@ -691,30 +691,10 @@
   ========================================================= */
 
   function obterUserId() {
+    return '4481eb0e-4fee-46e6-a43e-e2bb73985db5';
+}
 
-    let userId =
-      localStorage.getItem('cfo_user_id');
-
-    if (!userId) {
-
-      userId =
-        crypto.randomUUID();
-
-      localStorage.setItem(
-        'cfo_user_id',
-        userId
-      );
-
-    }
-
-    return userId;
-
-  }
-
-
-  const USER_ID = obterUserId();
-
-
+const USER_ID = obterUserId();
   /* =========================================================
      STATUS
   ========================================================= */
